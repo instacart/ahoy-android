@@ -85,6 +85,23 @@ public class AhoyRequestInterceptor implements okhttp3.Interceptor {
 At [Instacart](https://www.instacart.com) we use [Segment](https://www.segment.io) to send events a Date Warehouse and [Amplitude](https://www.amplitude.com). Whenever we make requests to Segment we include Ahoy visit token and extra parameters.
 
 
+## Installation
+Add this to your application's `build.gradle` file:
+
+```groovy
+repositories {
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
+dependencies {
+    // ...
+    compile 'com.github.instacart:ahoy-android:v0.2'
+    compile 'com.github.instacart.truetime-android:library:<release-version>'
+}
+```
+
 # License
 
 ```
