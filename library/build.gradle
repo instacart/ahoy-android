@@ -1,0 +1,67 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'com.neenbedankt.android-apt'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {url "https://clojars.org/repo/"}
+}
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "25.0.0"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 24
+        versionCode 1
+        versionName "0.1"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
+
+    sourceSets {
+        test.java.srcDirs += 'src/test/java'
+    }
+}
+
+dependencies {
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:4.12'
+
+    compile 'com.android.support:support-annotations:25.0.0'
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.jakewharton.timber:timber:4.3.1'
+
+    apt 'frankiesardo:auto-parcel:1.0.3'
+    provided 'frankiesardo:auto-parcel:1.0.3'
+
+    compile "com.squareup.okhttp3:logging-interceptor:3.4.1"
+    compile "com.squareup.retrofit2:adapter-rxjava:2.1.0"
+    compile "com.squareup.retrofit2:converter-jackson:2.1.0"
+    compile "com.squareup.retrofit2:retrofit:2.1.0"
+    compile "io.reactivex:rxjava:1.1.8"
+}
+
+group='com.github.instacart'
