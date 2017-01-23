@@ -98,7 +98,6 @@ repositories {
 dependencies {
     // ...
     compile 'com.github.instacart:ahoy-android:v0.2'
-    compile 'com.github.instacart.truetime-android:library:<release-version>'
 }
 ```
 
