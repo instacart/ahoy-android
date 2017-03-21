@@ -45,6 +45,7 @@ dependencies {
     compile project(path: ':library')
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
+
     compile "io.reactivex:rxandroid:1.1.0"
 
     compile "com.jakewharton:butterknife:8.4.0"

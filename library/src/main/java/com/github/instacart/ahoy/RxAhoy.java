@@ -17,11 +17,11 @@ package com.github.instacart.ahoy;
 
 import com.github.instacart.ahoy.Ahoy.VisitListener;
 
-import rx.AsyncEmitter;
-import rx.AsyncEmitter.BackpressureMode;
-import rx.AsyncEmitter.Cancellable;
+import rx.Emitter;
+import rx.Emitter.BackpressureMode;
 import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Cancellable;
 
 public class RxAhoy {
 
@@ -29,8 +29,8 @@ public class RxAhoy {
     }
 
     public static Observable<Visit> visitStream(final Ahoy ahoy) {
-        return Observable.fromAsync(new Action1<AsyncEmitter<Visit>>() {
-            @Override public void call(final AsyncEmitter<Visit> emitter) {
+        return Observable.create(new Action1<Emitter<Visit>>() {
+            @Override public void call(final Emitter<Visit> emitter) {
                 final VisitListener listener = new VisitListener() {
                     @Override public void onVisitUpdated(Visit visit) {
                         emitter.onNext(visit);
