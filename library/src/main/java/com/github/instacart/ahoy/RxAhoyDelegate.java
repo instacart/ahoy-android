@@ -21,8 +21,8 @@ import com.github.instacart.ahoy.delegate.AhoyDelegate;
 import com.github.instacart.ahoy.delegate.AhoyDelegate.AhoyCallback;
 import com.github.instacart.ahoy.delegate.VisitParams;
 
-import rx.AsyncEmitter;
-import rx.AsyncEmitter.BackpressureMode;
+import rx.Emitter;
+import rx.Emitter.BackpressureMode;
 import rx.Observable;
 import rx.functions.Action1;
 
@@ -33,8 +33,8 @@ class RxAhoyDelegate {
 
     public static Observable<Visit> createSaveExtrasStream(final AhoyDelegate delegate, final VisitParams params) {
 
-        return Observable.fromAsync(new Action1<AsyncEmitter<Visit>>() {
-            @Override public void call(final AsyncEmitter<Visit> emitter) {
+        return Observable.create(new Action1<Emitter<Visit>>() {
+            @Override public void call(final Emitter<Visit> emitter) {
                 delegate.saveExtras(params, new AhoyCallback() {
                     @Override public void onSuccess(@NonNull Visit visit) {
                         emitter.onNext(visit);
@@ -51,8 +51,8 @@ class RxAhoyDelegate {
 
     public static Observable<Visit> createNewVisitStream(final AhoyDelegate delegate, final VisitParams params) {
 
-        return Observable.fromAsync(new Action1<AsyncEmitter<Visit>>() {
-            @Override public void call(final AsyncEmitter<Visit> emitter) {
+        return Observable.create(new Action1<Emitter<Visit>>() {
+            @Override public void call(final Emitter<Visit> emitter) {
                 delegate.saveVisit(params, new AhoyCallback() {
                     @Override public void onSuccess(@NonNull Visit visit) {
                         emitter.onNext(visit);
