@@ -21,7 +21,6 @@ import android.support.annotation.VisibleForTesting;
 
 import com.github.instacart.ahoy.utils.ActivityLifecycleCallbacksStub;
 
-@VisibleForTesting
 public class LifecycleCallbackWrapper extends ActivityLifecycleCallbacksStub {
 
     private Listener mListener;
