@@ -151,7 +151,8 @@ public class Ahoy {
                     return;
                 }
             }
-            updateQueue.add(NewVisitRequest.create(VisitParams.create(visitorToken, null, null)));
+            updateQueue.add(0, NewVisitRequest.create(VisitParams.create(visitorToken, null,
+                    null)));
         }
     }
 

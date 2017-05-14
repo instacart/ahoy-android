@@ -35,6 +35,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -110,5 +111,49 @@ public class SaveUtmTest {
         assertTrue(latch.await(2000, TimeUnit.MILLISECONDS));
         verify(storage).saveVisit(visit);
         assertEquals(ahoy.visit(), visit);
+    }
+
+    @Test public void testStoringWithNoVisit() throws Exception {
+
+        final Map<String, Object> utmParams = new ArrayMap<>();
+        utmParams.put(Visit.UTM_CAMPAIGN, "campaign");
+        utmParams.put(Visit.UTM_CONTENT, "content");
+        utmParams.put(Visit.UTM_MEDIUM, "medium");
+        utmParams.put(Visit.UTM_SOURCE, "source");
+        utmParams.put(Visit.UTM_TERM, "term");
+
+        when(storage.readVisit(nullable(Visit.class))).thenReturn(Visit.empty());
+
+        final Visit updatedVisit = visit.withUpdatedExtraParams(utmParams);
+        delegate = new AhoyDelegate() {
+            @Override public String newVisitorToken() {
+                fail();
+                return null;
+            }
+
+            @Override public void saveVisit(VisitParams params, AhoyCallback callback) {
+                assertNull(params.visit());
+                callback.onSuccess(visit);
+            }
+
+            @Override public void saveExtras(VisitParams params, AhoyCallback callback) {
+                assertEquals(VisitParams.create(visitorToken, visit, utmParams), params);
+                callback.onSuccess(updatedVisit);
+            }
+        };
+        final CountDownLatch latch = new CountDownLatch(2);
+        ahoy.init(storage, wrapper, delegate, true);
+        ahoy.addVisitListener(new VisitListener() {
+            @Override public void onVisitUpdated(Visit visit) {
+                latch.countDown();
+            }
+        });
+        wrapper.onActivityCreated(null, null);
+        ahoy.saveExtras(utmParams);
+
+        assertTrue(latch.await(2000, TimeUnit.MILLISECONDS));
+        verify(storage).saveVisit(visit);
+        verify(storage).saveVisit(updatedVisit);
+        assertEquals(ahoy.visit(), updatedVisit);
     }
 }
