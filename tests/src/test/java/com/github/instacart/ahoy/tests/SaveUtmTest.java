@@ -124,6 +124,7 @@ public class SaveUtmTest {
 
         when(storage.readVisit(nullable(Visit.class))).thenReturn(Visit.empty());
 
+        final Visit updatedVisit = visit.withUpdatedExtraParams(utmParams);
         delegate = new AhoyDelegate() {
             @Override public String newVisitorToken() {
                 fail();
@@ -137,7 +138,7 @@ public class SaveUtmTest {
 
             @Override public void saveExtras(VisitParams params, AhoyCallback callback) {
                 assertEquals(VisitParams.create(visitorToken, visit, utmParams), params);
-                callback.onSuccess(visit.withUpdatedExtraParams(utmParams));
+                callback.onSuccess(updatedVisit);
             }
         };
         final CountDownLatch latch = new CountDownLatch(2);
@@ -152,6 +153,7 @@ public class SaveUtmTest {
 
         assertTrue(latch.await(2000, TimeUnit.MILLISECONDS));
         verify(storage).saveVisit(visit);
-        assertEquals(ahoy.visit(), visit.withUpdatedExtraParams(utmParams));
+        verify(storage).saveVisit(updatedVisit);
+        assertEquals(ahoy.visit(), updatedVisit);
     }
 }
