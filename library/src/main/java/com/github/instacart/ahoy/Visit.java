@@ -17,12 +17,14 @@ package com.github.instacart.ahoy;
 
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.v4.util.ArrayMap;
 
-import com.google.auto.value.AutoValue;
+import com.github.instacart.ahoy.utils.MapTypeAdapter;
 import com.github.instacart.ahoy.utils.TypeUtil;
+import com.google.auto.value.AutoValue;
+import com.ryanharter.auto.value.parcel.ParcelAdapter;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @AutoValue
@@ -49,7 +51,7 @@ public abstract class Visit implements Parcelable {
     }
 
     public abstract String visitToken();
-    public abstract Map<String, Object> extraParams();
+    @ParcelAdapter(MapTypeAdapter.class) public abstract Map<String, Object> extraParams();
     public abstract long expiresAt();
 
     public static Visit empty() {
@@ -69,7 +71,8 @@ public abstract class Visit implements Parcelable {
     }
 
     public Visit withUpdatedExtraParams(Map<String, Object> extraParams) {
-        Map<String, Object> map = new HashMap<String, Object>(extraParams());
+        Map<String, Object> map = new ArrayMap<>();
+        map.putAll(extraParams());
         map.putAll(extraParams);
         return Visit.create(visitToken(), map, expiresAt());
     }

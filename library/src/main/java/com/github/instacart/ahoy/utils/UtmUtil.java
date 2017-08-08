@@ -17,11 +17,11 @@ package com.github.instacart.ahoy.utils;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 
 import com.github.instacart.ahoy.Visit;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,7 +44,7 @@ public class UtmUtil {
         if (params == null) {
             return null;
         }
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new ArrayMap<>();
         for (String key : UTM_PARAMS) {
             if (!params.containsKey(key)) {
                 continue;

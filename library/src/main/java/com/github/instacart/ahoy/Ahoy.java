@@ -46,18 +46,18 @@ public class Ahoy {
      */
     private static final long DEFAULT_REQUEST_RETRY_DELAY = 1000;
 
-    private CompositeSubscription scheduledSubscriptions = new CompositeSubscription();
-    private CompositeSubscription updatesSubscription = new CompositeSubscription();
+    private final CompositeSubscription scheduledSubscriptions = new CompositeSubscription();
+    private final CompositeSubscription updatesSubscription = new CompositeSubscription();
 
     private AhoyDelegate delegate;
     private final Scheduler singleThreadScheduler = Schedulers.from(Executors.newSingleThreadExecutor());
     private boolean shutdown;
     private Storage storage;
     private Visit visit;
-    private List<VisitListener> visitListeners = new ArrayList<>();
+    private final List<VisitListener> visitListeners = new ArrayList<>();
     private String visitorToken;
 
-    private ArrayList<Request> updateQueue = new ArrayList<>();
+    private final ArrayList<Request> updateQueue = new ArrayList<>();
     private volatile boolean updateLock = false;
 
     public interface VisitListener {
@@ -151,8 +151,7 @@ public class Ahoy {
                     return;
                 }
             }
-            updateQueue.add(0, NewVisitRequest.create(VisitParams.create(visitorToken, null,
-                    null)));
+            updateQueue.add(0, NewVisitRequest.create(VisitParams.create(visitorToken, null, null)));
         }
     }
 

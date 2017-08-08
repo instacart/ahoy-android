@@ -19,12 +19,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -121,7 +121,7 @@ public class SharedPreferencesWrapper {
 
         Map<String, Object> value = null;
         try {
-            value = mObjectMapper.readValue(json, HashMap.class);
+            value = mObjectMapper.readValue(json, ArrayMap.class);
         } catch (IOException e) {
             Timber.e(e);
         }

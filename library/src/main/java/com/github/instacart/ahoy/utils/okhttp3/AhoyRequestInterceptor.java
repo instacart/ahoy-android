@@ -1,5 +1,7 @@
 package com.github.instacart.ahoy.utils.okhttp3;
 
+import android.support.annotation.NonNull;
+
 import com.github.instacart.ahoy.Ahoy;
 import com.github.instacart.ahoy.Visit;
 
@@ -17,7 +19,7 @@ public class AhoyRequestInterceptor implements Interceptor {
 
     private Ahoy ahoy;
 
-    @Override public Response intercept(Chain chain) throws IOException {
+    @Override public Response intercept(@NonNull Chain chain) throws IOException {
         if (ahoy == null) {
             return chain.proceed(chain.request());
         }
