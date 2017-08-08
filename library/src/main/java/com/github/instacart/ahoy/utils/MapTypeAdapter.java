@@ -12,7 +12,7 @@ public class MapTypeAdapter implements TypeAdapter<Map<String, Object>> {
 
     @Override
     public Map<String, Object> fromParcel(Parcel parcel) {
-        int size = parcel.dataSize() / 2;
+        int size = parcel.readInt();
         Map<String, Object> map = new ArrayMap<>(size);
 
         for (int i = 0; i < size; i++) {
@@ -23,6 +23,8 @@ public class MapTypeAdapter implements TypeAdapter<Map<String, Object>> {
 
     @Override
     public void toParcel(Map<String, Object> map, Parcel parcel) {
+        parcel.writeInt(map.size());
+
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             parcel.writeString(entry.getKey());
             parcel.writeValue(entry.getValue());
