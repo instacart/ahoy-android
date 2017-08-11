@@ -32,16 +32,16 @@ android {
 }
 
 ext {
-    supportLibVersion = "26.0.0"
+    supportLibraryVersion = '26.0.1'
 }
 
 dependencies {
     compile project(path: ':library')
-    compile "com.android.support:appcompat-v7:$supportLibVersion"
-    compile "com.android.support:design:$supportLibVersion"
+    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
+    compile "com.android.support:design:$supportLibraryVersion"
 
     compile "io.reactivex:rxandroid:1.2.1"
 
-    compile "com.jakewharton:butterknife:8.8.0"
-    annotationProcessor "com.jakewharton:butterknife-compiler:8.8.0"
+    compile "com.jakewharton:butterknife:8.8.1"
+    annotationProcessor "com.jakewharton:butterknife-compiler:8.8.1"
 }
