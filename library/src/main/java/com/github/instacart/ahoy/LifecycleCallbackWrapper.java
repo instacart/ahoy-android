@@ -17,7 +17,6 @@ package com.github.instacart.ahoy;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.VisibleForTesting;
 
 import com.github.instacart.ahoy.utils.ActivityLifecycleCallbacksStub;
 

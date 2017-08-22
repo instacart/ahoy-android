@@ -25,8 +25,11 @@ import java.util.Map;
 @AutoValue
 public abstract class VisitParams {
 
-    public static VisitParams create(String visitorToken, @Nullable Visit visit,
+    public static VisitParams create(
+            String visitorToken,
+            @Nullable Visit visit,
             @Nullable Map<String, Object> extraParams) {
+
         return new AutoValue_VisitParams(visit, visitorToken, extraParams);
     }
 

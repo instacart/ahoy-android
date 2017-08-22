@@ -17,7 +17,7 @@ package com.github.instacart.ahoy.delegate.retrofit2;
 
 import java.util.concurrent.TimeUnit;
 
-import retrofit2.adapter.rxjava.HttpException;
+import retrofit2.HttpException;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -25,9 +25,9 @@ class RxBackoff {
 
     private static final int DEFAULT_RECONNECT_ATTEMPTS = 3;
 
-    static class RetryFunc1 implements Func1<Throwable, Observable<Long>> {
+    private static class RetryFunc1 implements Func1<Throwable, Observable<Long>> {
 
-        private int mAttempts;
+        private final int mAttempts;
         private int mRetryCounter = 0;
 
         public RetryFunc1(int attempts) {
@@ -59,11 +59,7 @@ class RxBackoff {
             }
 
             int status = ((HttpException) throwable).code();
-            if (isStatusWorthRetry(status)) {
-                return true;
-            }
-
-            return false;
+            return isStatusWorthRetry(status);
         }
 
         private boolean isStatusWorthRetry(int status) {

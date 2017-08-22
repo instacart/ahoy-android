@@ -16,6 +16,8 @@
 package com.github.instacart.ahoy.delegate.retrofit2;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.v4.util.ArrayMap;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,7 +33,6 @@ import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +86,7 @@ public class Retrofit2Delegate implements AhoyDelegate {
         loggingInterceptor.setLevel(loggingEnabled ? Level.BODY : Level.NONE);
 
         Interceptor userAgentInterceptor = new Interceptor() {
-            @Override public Response intercept(Chain chain) throws IOException {
+            @Override public Response intercept(@NonNull Chain chain) throws IOException {
                 Builder builder = chain.request().newBuilder();
                 builder.header("User-Agent", deviceInfo.getUserAgent());
                 return chain.proceed(builder.build());
@@ -115,13 +116,13 @@ public class Retrofit2Delegate implements AhoyDelegate {
                 .client(okHttpClient)
                 .build();
 
-        api = retrofit.create(ApiRetrofit2.class);
+        this.api = retrofit.create(ApiRetrofit2.class);
         this.deviceInfo = deviceInfo;
         this.visitDuration = visitDuration;
     }
 
     private void makeRequest(String visitToken, final VisitParams visitParams, final AhoyCallback callback) {
-        Map<String, Object> request = new HashMap<>();
+        Map<String, Object> request = new ArrayMap<>();
         request.put(Visit.OS, deviceInfo.getOs());
         request.put(Visit.USER_AGENT, deviceInfo.getUserAgent());
         request.put(Visit.SCREEN_HEIGHT, deviceInfo.getScreenHeightDp());

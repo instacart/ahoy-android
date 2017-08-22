@@ -19,22 +19,25 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+import timber.log.Timber;
+
 public class SharedPreferencesWrapper {
 
-    private final Gson gson;
     private final SharedPreferences mSharedPreferences;
+    private final ObjectMapper mObjectMapper;
 
     public SharedPreferencesWrapper(Context context, String fileName) {
         mSharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
-        gson = new GsonBuilder().create();
+        mObjectMapper = new ObjectMapper();
     }
 
     public void delete(String key) {
@@ -103,8 +106,11 @@ public class SharedPreferencesWrapper {
             return;
         }
 
-        String json = gson.toJson(map);
-        putString(key, json);
+        try {
+            putString(key, mObjectMapper.writeValueAsString(map));
+        } catch (JsonProcessingException e) {
+            Timber.e(e);
+        }
     }
 
     public Map<String, Object> getStringMap(String key, Map<String, Object> defaultValue) {
@@ -113,7 +119,13 @@ public class SharedPreferencesWrapper {
             return defaultValue;
         }
 
-        return TypeUtil.ifNull(gson.fromJson(json, HashMap.class), defaultValue);
+        Map<String, Object> value = null;
+        try {
+            value = mObjectMapper.readValue(json, ArrayMap.class);
+        } catch (IOException e) {
+            Timber.e(e);
+        }
+        return TypeUtil.ifNull(value, defaultValue);
     }
 
     public void clear() {
