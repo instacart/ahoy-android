@@ -17,34 +17,19 @@ package com.github.instacart.ahoy;
 
 import com.github.instacart.ahoy.Ahoy.VisitListener;
 
-import rx.Emitter;
-import rx.Emitter.BackpressureMode;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Cancellable;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 
 public class RxAhoy {
 
     private RxAhoy() {
     }
 
-    public static Observable<Visit> visitStream(final Ahoy ahoy) {
-        return Observable.create(new Action1<Emitter<Visit>>() {
-            @Override public void call(final Emitter<Visit> emitter) {
-                final VisitListener listener = new VisitListener() {
-                    @Override public void onVisitUpdated(Visit visit) {
-                        emitter.onNext(visit);
-                    }
-                };
-
-                ahoy.addVisitListener(listener);
-
-                emitter.setCancellation(new Cancellable() {
-                    @Override public void cancel() throws Exception {
-                        ahoy.removeVisitListener(listener);
-                    }
-                });
-            }
-        }, BackpressureMode.LATEST);
+    public static Flowable<Visit> visitStream(final Ahoy ahoy) {
+        return Flowable.create(emitter -> {
+            final VisitListener listener = emitter::onNext;
+            ahoy.addVisitListener(listener);
+            emitter.setCancellable(() -> ahoy.removeVisitListener(listener));
+        }, BackpressureStrategy.LATEST);
     }
 }

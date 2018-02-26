@@ -33,13 +33,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.functions.Action1;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 import timber.log.Timber;
 
 import static junit.framework.Assert.assertTrue;
@@ -57,12 +55,7 @@ public class FreshVisitTest {
     private LifecycleCallbackWrapper wrapper;
     private String visitorToken;
 
-    private CompositeSubscription compositeSubscription = new CompositeSubscription();
-
-    class NoOp<T> implements Action1<T> {
-        @Override public void call(T t) {
-        }
-    }
+    private CompositeDisposable compositeSubscription = new CompositeDisposable();
 
     class PassThroughDelegate implements AhoyDelegate {
 
@@ -70,8 +63,7 @@ public class FreshVisitTest {
         private List<String> nextTokens = Arrays.asList("0", "1", "2", "3");
 
         private String getNextToken() {
-            String token = nextTokens.get(nextTokenIndex++);
-            return token;
+            return nextTokens.get(nextTokenIndex++);
         }
 
         @Override public String newVisitorToken() {
@@ -80,28 +72,24 @@ public class FreshVisitTest {
 
         @Override public void saveVisit(final VisitParams params, final AhoyCallback callback) {
             compositeSubscription.add(Observable
-                    .fromCallable(new Callable<Object>() {
-                        @Override public Object call() throws Exception {
-                            callback.onSuccess(generateVisit(params));
-                            return null;
-                        }
+                    .fromCallable(() -> {
+                        callback.onSuccess(generateVisit(params));
+                        return null;
                     })
             .delay(200, TimeUnit.MILLISECONDS)
-            .subscribe(new NoOp<>()));
+            .subscribe());
         }
 
         @Override public void saveExtras(final VisitParams params, final AhoyCallback callback) {
             compositeSubscription.add(Observable
-                    .fromCallable(new Callable<Object>() {
-                        @Override public Object call() throws Exception {
-                            Visit visit = params.visit();
-                            String visitToken = visit.visitToken();
-                            callback.onSuccess(Visit.create(visitToken, params.extraParams(), visit.expiresAt()));
-                            return null;
-                        }
+                    .fromCallable(() -> {
+                        Visit visit = params.visit();
+                        String visitToken = visit.visitToken();
+                        callback.onSuccess(Visit.create(visitToken, params.extraParams(), visit.expiresAt()));
+                        return null;
                     })
             .delay(200, TimeUnit.MILLISECONDS)
-            .subscribe(new NoOp<>()));
+            .subscribe());
         }
 
         Visit generateVisit(VisitParams params) {

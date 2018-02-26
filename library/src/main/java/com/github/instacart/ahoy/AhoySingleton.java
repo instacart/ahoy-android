@@ -16,14 +16,13 @@
 package com.github.instacart.ahoy;
 
 import android.app.Application;
-import android.support.annotation.Nullable;
 
 import com.github.instacart.ahoy.Ahoy.VisitListener;
 import com.github.instacart.ahoy.delegate.AhoyDelegate;
 
 import java.util.Map;
 
-import rx.Observable;
+import io.reactivex.Flowable;
 
 public class AhoySingleton {
 
@@ -36,7 +35,7 @@ public class AhoySingleton {
         sInstance.init(new Storage(application), wrapper, delegate, autoStart);
     }
 
-    @Nullable public static Visit visit() {
+    public static Visit visit() {
         return sInstance.visit();
     }
 
@@ -52,7 +51,7 @@ public class AhoySingleton {
         sInstance.removeVisitListener(listener);
     }
 
-    public static Observable<Visit> visitStream() {
+    public static Flowable<Visit> visitStream() {
         return RxAhoy.visitStream(sInstance);
     }
 

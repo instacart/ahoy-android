@@ -53,7 +53,7 @@ public class StoredVisitTest {
     @Test public void testStoredVisit() throws Exception {
         String token = UUID.randomUUID().toString();
         long inAnHour = System.currentTimeMillis() + 3600;
-        Visit visit = Visit.create(token, Collections.<String, Object>emptyMap(), inAnHour);
+        Visit visit = Visit.create(token, Collections.emptyMap(), inAnHour);
 
         when(storage.readVisit(any(Visit.class))).thenReturn(visit);
         ahoy.init(storage, wrapper, delegate, true);

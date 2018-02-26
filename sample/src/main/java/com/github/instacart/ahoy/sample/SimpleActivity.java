@@ -39,7 +39,7 @@ public class SimpleActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.new_visit:
-                AhoySingleton.newVisit(Collections.<String, Object>emptyMap());
+                AhoySingleton.newVisit(Collections.emptyMap());
                 break;
             case R.id.save_utms:
                 startActivity(new Intent(this, UtmActivity.class));

@@ -28,9 +28,8 @@ import com.github.instacart.ahoy.Visit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 public class VisitView extends LinearLayout {
 
@@ -38,7 +37,7 @@ public class VisitView extends LinearLayout {
     @BindView(R.id.visit_token) TextView visitTokenView;
     @BindView(R.id.visitor_token) TextView visitorTokenView;
 
-    private Subscription mSubscription;
+    private Disposable mDisposable;
 
     public VisitView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -51,19 +50,15 @@ public class VisitView extends LinearLayout {
 
     @Override protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mSubscription = AhoySingleton.visitStream()
+        mDisposable = AhoySingleton.visitStream()
                 .startWith(AhoySingleton.visit())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Visit>() {
-                    @Override public void call(Visit visit) {
-                        updateViews(AhoySingleton.visitorToken(), visit);
-                    }
-                });
+                .subscribe(visit -> updateViews(AhoySingleton.visitorToken(), visit));
     }
 
     @Override protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mSubscription.unsubscribe();
+        mDisposable.dispose();
     }
 
     public void updateViews(String visitorToken, Visit visit) {

@@ -16,7 +16,6 @@
 package com.github.instacart.ahoy.tests;
 
 import com.github.instacart.ahoy.Ahoy;
-import com.github.instacart.ahoy.Ahoy.VisitListener;
 import com.github.instacart.ahoy.LifecycleCallbackWrapper;
 import com.github.instacart.ahoy.Storage;
 import com.github.instacart.ahoy.Visit;
@@ -66,7 +65,7 @@ public class SaveVisitRetryTest {
 
         final Visit visit = Visit.create(
                 UUID.randomUUID().toString(),
-                Collections.<String, Object>emptyMap(),
+                Collections.emptyMap(),
                 System.currentTimeMillis() + 3600);
 
         delegate = new AhoyDelegate() {
@@ -93,11 +92,7 @@ public class SaveVisitRetryTest {
         };
         final CountDownLatch latch = new CountDownLatch(1);
         ahoy.init(storage, wrapper, delegate, true);
-        ahoy.addVisitListener(new VisitListener() {
-            @Override public void onVisitUpdated(Visit visit) {
-                latch.countDown();
-            }
-        });
+        ahoy.addVisitListener(ignored -> latch.countDown());
         wrapper.onActivityCreated(null, null);
         assertTrue(latch.await(7000, TimeUnit.MILLISECONDS));
         verify(storage).saveVisit(visit);
