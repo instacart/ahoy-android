@@ -55,7 +55,7 @@ public class FreshVisitTest {
     private LifecycleCallbackWrapper wrapper;
     private String visitorToken;
 
-    private CompositeDisposable compositeSubscription = new CompositeDisposable();
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     class PassThroughDelegate implements AhoyDelegate {
 
@@ -71,7 +71,7 @@ public class FreshVisitTest {
         }
 
         @Override public void saveVisit(final VisitParams params, final AhoyCallback callback) {
-            compositeSubscription.add(Observable
+            disposables.add(Observable
                     .fromCallable(() -> {
                         callback.onSuccess(generateVisit(params));
                         return null;
@@ -81,7 +81,7 @@ public class FreshVisitTest {
         }
 
         @Override public void saveExtras(final VisitParams params, final AhoyCallback callback) {
-            compositeSubscription.add(Observable
+            disposables.add(Observable
                     .fromCallable(() -> {
                         Visit visit = params.visit();
                         String visitToken = visit.visitToken();
@@ -138,7 +138,7 @@ public class FreshVisitTest {
     }
 
     @After public void clearSubscription() {
-        compositeSubscription.clear();
+        disposables.clear();
     }
 
     private Map<String, Object> createUtmParams(int salt) {
