@@ -17,24 +17,25 @@ package com.github.instacart.ahoy.delegate.retrofit2;
 
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableTransformer;
+import io.reactivex.functions.Function;
 import retrofit2.HttpException;
-import rx.Observable;
-import rx.functions.Func1;
 
 class RxBackoff {
 
     private static final int DEFAULT_RECONNECT_ATTEMPTS = 3;
 
-    private static class RetryFunc1 implements Func1<Throwable, Observable<Long>> {
+    private static class RetryFunction implements Function<Throwable, Observable<Long>> {
 
         private final int mAttempts;
         private int mRetryCounter = 0;
 
-        public RetryFunc1(int attempts) {
+        public RetryFunction(int attempts) {
             mAttempts = attempts;
         }
 
-        @Override public Observable<Long> call(final Throwable throwable) {
+        @Override public Observable<Long> apply(final Throwable throwable) {
 
             if (!isRetryNeeded(throwable)) {
                 return Observable.error(throwable);
@@ -44,10 +45,10 @@ class RxBackoff {
                 return Observable.error(throwable);
             }
 
-            return Observable.timer(getDelayTime(mRetryCounter - 1, mAttempts), TimeUnit.MILLISECONDS);
+            return Observable.timer(getDelayTime(mRetryCounter - 1), TimeUnit.MILLISECONDS);
         }
 
-        private int getDelayTime(int currentRetry, int maxRetries) {
+        private int getDelayTime(int currentRetry) {
             // exponential back-off
             return (int) (Math.pow(2, currentRetry) * 100);
         }
@@ -70,7 +71,7 @@ class RxBackoff {
     private RxBackoff() {
     }
 
-    public static <T> Observable.Transformer<T, T> backoff() {
+    public static <T> ObservableTransformer<T, T> backoff() {
         return backoff(DEFAULT_RECONNECT_ATTEMPTS - 1);
     }
 
@@ -79,28 +80,18 @@ class RxBackoff {
      *
      * @param retryAttempts The max number of attempts to retry this task or -1 to try MAX_INT times,
      */
-    public static <T> Observable.Transformer<T, T> backoff(final int retryAttempts) {
-        return new Observable.Transformer<T, T>() {
-            @Override public Observable<T> call(final Observable<T> observable) {
-                return observable.retryWhen(retryFunc(retryAttempts));
-            }
-        };
+    public static <T> ObservableTransformer<T, T> backoff(final int retryAttempts) {
+        return observable -> observable.retryWhen(retryFunc(retryAttempts));
     }
 
     /**
-     *
      * Source: https://gist.github.com/sddamico/c45d7cdabc41e663bea1
      */
-    private static Func1<? super Observable<? extends Throwable>, ? extends Observable<?>> retryFunc(
+    private static Function<? super Observable<? extends Throwable>, ? extends Observable<?>> retryFunc(
             final int attempts) {
 
-        return new Func1<Observable<? extends Throwable>, Observable<Long>>() {
-            @Override public Observable<Long> call(Observable<? extends Throwable> observable) {
-                // zip our number of retries to the incoming errors so that we only produce retries
-                // when there's been an error
-                return observable
-                        .flatMap(new RetryFunc1(attempts));
-            }
-        };
+        // zip our number of retries to the incoming errors so that we only produce retries
+        // when there's been an error
+        return observable -> observable.switchMap(new RetryFunction(attempts));
     }
 }

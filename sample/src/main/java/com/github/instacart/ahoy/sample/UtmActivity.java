@@ -30,9 +30,8 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 public class UtmActivity extends AppCompatActivity {
 
@@ -42,7 +41,7 @@ public class UtmActivity extends AppCompatActivity {
     @BindView(R.id.utm_source) TextView utmSource;
     @BindView(R.id.utm_term) TextView utmTerm;
 
-    private Subscription mSubscription;
+    private Disposable mDisposable;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,27 +54,23 @@ public class UtmActivity extends AppCompatActivity {
     @Override protected void onResume() {
         super.onResume();
 
-        mSubscription = AhoySingleton.visitStream()
+        mDisposable = AhoySingleton.visitStream()
                 .startWith(AhoySingleton.visit())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Visit>() {
-                    @Override public void call(Visit visit) {
-                        showUtmParams(visit);
-                    }
-                });
+                .subscribe(this::showUtmParams);
     }
 
     @Override protected void onPause() {
         super.onPause();
-        mSubscription.unsubscribe();
+        mDisposable.dispose();
     }
 
     private void showUtmParams(Visit visit) {
-        utmCampaign.setText((String) visit.extra(Visit.UTM_CAMPAIGN));
-        utmContent.setText((String) visit.extra(Visit.UTM_CONTENT));
-        utmMedium.setText((String) visit.extra(Visit.UTM_MEDIUM));
-        utmSource.setText((String) visit.extra(Visit.UTM_SOURCE));
-        utmTerm.setText((String) visit.extra(Visit.UTM_TERM));
+        utmCampaign.setText(visit.extra(Visit.UTM_CAMPAIGN));
+        utmContent.setText(visit.extra(Visit.UTM_CONTENT));
+        utmMedium.setText(visit.extra(Visit.UTM_MEDIUM));
+        utmSource.setText(visit.extra(Visit.UTM_SOURCE));
+        utmTerm.setText(visit.extra(Visit.UTM_TERM));
     }
 
     private static void saveContent(Map<String, Object> params, String key, TextView textView) {

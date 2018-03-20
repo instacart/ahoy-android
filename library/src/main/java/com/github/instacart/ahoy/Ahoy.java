@@ -30,11 +30,11 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Scheduler;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class Ahoy {
@@ -46,18 +46,19 @@ public class Ahoy {
      */
     private static final long DEFAULT_REQUEST_RETRY_DELAY = 1000;
 
-    private final CompositeSubscription scheduledSubscriptions = new CompositeSubscription();
-    private final CompositeSubscription updatesSubscription = new CompositeSubscription();
+    private final CompositeDisposable scheduledSubscriptions = new CompositeDisposable();
+    private final CompositeDisposable updatesSubscription = new CompositeDisposable();
+
+    private final Scheduler singleThreadScheduler = Schedulers.from(Executors.newSingleThreadExecutor());
+    private final List<VisitListener> visitListeners = new ArrayList<>();
+    private final List<Request> updateQueue = new ArrayList<>();
 
     private AhoyDelegate delegate;
-    private final Scheduler singleThreadScheduler = Schedulers.from(Executors.newSingleThreadExecutor());
-    private boolean shutdown;
     private Storage storage;
     private Visit visit;
-    private final List<VisitListener> visitListeners = new ArrayList<>();
     private String visitorToken;
+    private boolean shutdown;
 
-    private final ArrayList<Request> updateQueue = new ArrayList<>();
     private volatile boolean updateLock = false;
 
     public interface VisitListener {
@@ -89,8 +90,7 @@ public class Ahoy {
     public Ahoy() {
     }
 
-    public void init(Storage storage, LifecycleCallbackWrapper wrapper, AhoyDelegate ahoyDelegate, final boolean
-            autoStart) {
+    public void init(Storage storage, LifecycleCallbackWrapper wrapper, AhoyDelegate ahoyDelegate, final boolean autoStart) {
         this.delegate = ahoyDelegate;
         this.storage = storage;
 
@@ -128,19 +128,17 @@ public class Ahoy {
 
     private void scheduleUpdate(long timestamp) {
         scheduledSubscriptions.clear();
-        final long delay = Math.max(timestamp - System.currentTimeMillis(), 0);
-        Timber.tag(TAG).d(String.format("schedule update with delay %d at %d", delay, System.currentTimeMillis()));
+        long delay = Math.max(timestamp - System.currentTimeMillis(), 0);
+        Timber.tag(TAG).d("schedule update with delay %d at %d", delay, System.currentTimeMillis());
         scheduledSubscriptions.add(
                 Observable.timer(delay, TimeUnit.MILLISECONDS)
                         .observeOn(singleThreadScheduler)
-                        .subscribe(new Action1<Long>() {
-                            @Override public void call(Long aLong) {
-                                Timber.tag(TAG).d(String.format("update at %d", System.currentTimeMillis()));
-                                if (!visit.isValid()) {
-                                    enqueueExpiredVisitUpdate();
-                                }
-                                processQueue();
+                        .subscribe(ignored -> {
+                            Timber.tag(TAG).d("update at %d", System.currentTimeMillis());
+                            if (!visit.isValid()) {
+                                enqueueExpiredVisitUpdate();
                             }
+                            processQueue();
                         }));
     }
 
@@ -170,34 +168,29 @@ public class Ahoy {
 
             final Request request = updateQueue.get(0);
 
-            Observable<Visit> visitObservable;
+            Flowable<Visit> visitFlowable;
             if (request instanceof NewVisitRequest) {
                 NewVisitRequest newVisitRequest = (NewVisitRequest) request;
-                visitObservable = RxAhoyDelegate.createNewVisitStream(delegate, newVisitRequest.getVisitParams());
+                visitFlowable = RxAhoyDelegate.createNewVisitStream(delegate, newVisitRequest.getVisitParams());
             } else {
                 SaveExtrasRequest saveExtrasRequest = (SaveExtrasRequest) request;
                 VisitParams params = VisitParams.create(visitorToken, visit, saveExtrasRequest.getExtras());
-                visitObservable = RxAhoyDelegate.createSaveExtrasStream(delegate, params);
+                visitFlowable = RxAhoyDelegate.createSaveExtrasStream(delegate, params);
             }
 
             updatesSubscription.add(
-                    visitObservable
-                            .subscribe(new Action1<Visit>() {
-                                @Override public void call(Visit visit) {
-                                    saveVisit(visit);
-                                    synchronized (updateQueue) {
-                                        updateQueue.remove(0);
-                                    }
-                                    updateLock = false;
-                                    scheduleUpdate(0);
+                    visitFlowable
+                            .subscribe(visit -> {
+                                saveVisit(visit);
+                                synchronized (updateQueue) {
+                                    updateQueue.remove(0);
                                 }
-                            }, new Action1<Throwable>() {
-                                @Override public void call(Throwable throwable) {
-                                    throwable.printStackTrace();
-                                    updateLock = false;
-                                    Timber.tag(TAG).d("failed " + request);
-                                    scheduleUpdate(System.currentTimeMillis() + DEFAULT_REQUEST_RETRY_DELAY);
-                                }
+                                updateLock = false;
+                                scheduleUpdate(0);
+                            }, throwable -> {
+                                updateLock = false;
+                                Timber.tag(TAG).d(throwable, "failed %s", request);
+                                scheduleUpdate(System.currentTimeMillis() + DEFAULT_REQUEST_RETRY_DELAY);
                             }));
         }
     }
@@ -210,7 +203,7 @@ public class Ahoy {
 
         Visit oldVisit = this.visit;
         this.visit = visit;
-        Timber.tag(TAG).d("saving updated visit " + visit.toString());
+        Timber.tag(TAG).d("saving updated visit %s", visit);
         storage.saveVisit(visit);
         if (!oldVisit.equals(visit)) {
             fireVisitUpdatedEvent();

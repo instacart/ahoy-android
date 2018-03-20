@@ -53,11 +53,7 @@ public class MockParcel {
     }
 
     private void setupOthers() {
-        doAnswer(new Answer<Integer>() {
-            @Override public Integer answer(InvocationOnMock invocation) throws Throwable {
-                return objects.size();
-            }
-        }).when(mockedParcel).dataSize();
+        doAnswer(invocation -> objects.size()).when(mockedParcel).dataSize();
     }
 
     private class WriteAnswer implements Answer<Void> {

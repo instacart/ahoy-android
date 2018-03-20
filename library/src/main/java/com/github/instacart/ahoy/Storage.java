@@ -42,8 +42,7 @@ public class Storage {
         if (visitToken == null) {
             return defaultValue;
         }
-        Map<String, Object> emptyMap = Collections.emptyMap();
-        Map<String, Object> extraParams = sharedPreferences.getStringMap(VISIT_EXTRA_PARAMS, emptyMap);
+        Map<String, Object> extraParams = sharedPreferences.getStringMap(VISIT_EXTRA_PARAMS, Collections.emptyMap());
         long visitTokenExpiration = sharedPreferences.getLong(VISIT_EXPIRATION, 0);
         return Visit.create(visitToken, extraParams, visitTokenExpiration);
     }

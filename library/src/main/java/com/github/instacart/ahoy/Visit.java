@@ -46,7 +46,7 @@ public abstract class Visit implements Parcelable {
     public static final String UTM_TERM = "utm_term";
 
     public static Visit create(String visitToken, @NonNull Map<String, Object> extraParams, long expiresAt) {
-        extraParams = TypeUtil.ifNull(extraParams, Collections.<String, Object>emptyMap());
+        extraParams = TypeUtil.ifNull(extraParams, Collections.emptyMap());
         return new AutoValue_Visit(visitToken, Collections.unmodifiableMap(extraParams), expiresAt);
     }
 
@@ -55,7 +55,7 @@ public abstract class Visit implements Parcelable {
     public abstract long expiresAt();
 
     public static Visit empty() {
-        return create("", Collections.<String, Object>emptyMap(), 0);
+        return create("", Collections.emptyMap(), 0);
     }
 
     public Visit expire() {

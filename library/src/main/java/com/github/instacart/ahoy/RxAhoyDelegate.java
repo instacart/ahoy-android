@@ -21,49 +21,40 @@ import com.github.instacart.ahoy.delegate.AhoyDelegate;
 import com.github.instacart.ahoy.delegate.AhoyDelegate.AhoyCallback;
 import com.github.instacart.ahoy.delegate.VisitParams;
 
-import rx.Emitter;
-import rx.Emitter.BackpressureMode;
-import rx.Observable;
-import rx.functions.Action1;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+
 
 class RxAhoyDelegate {
 
     private RxAhoyDelegate() {
     }
 
-    public static Observable<Visit> createSaveExtrasStream(final AhoyDelegate delegate, final VisitParams params) {
+    public static Flowable<Visit> createSaveExtrasStream(final AhoyDelegate delegate, final VisitParams params) {
 
-        return Observable.create(new Action1<Emitter<Visit>>() {
-            @Override public void call(final Emitter<Visit> emitter) {
-                delegate.saveExtras(params, new AhoyCallback() {
-                    @Override public void onSuccess(@NonNull Visit visit) {
-                        emitter.onNext(visit);
-                        emitter.onCompleted();
-                    }
-
-                    @Override public void onFailure(Throwable throwable) {
-                        emitter.onError(throwable);
-                    }
-                });
+        return Flowable.create(emitter -> delegate.saveExtras(params, new AhoyCallback() {
+            @Override public void onSuccess(@NonNull Visit visit) {
+                emitter.onNext(visit);
+                emitter.onComplete();
             }
-        }, BackpressureMode.LATEST);
+
+            @Override public void onFailure(Throwable throwable) {
+                emitter.onError(throwable);
+            }
+        }), BackpressureStrategy.LATEST);
     }
 
-    public static Observable<Visit> createNewVisitStream(final AhoyDelegate delegate, final VisitParams params) {
+    public static Flowable<Visit> createNewVisitStream(final AhoyDelegate delegate, final VisitParams params) {
 
-        return Observable.create(new Action1<Emitter<Visit>>() {
-            @Override public void call(final Emitter<Visit> emitter) {
-                delegate.saveVisit(params, new AhoyCallback() {
-                    @Override public void onSuccess(@NonNull Visit visit) {
-                        emitter.onNext(visit);
-                        emitter.onCompleted();
-                    }
-
-                    @Override public void onFailure(Throwable throwable) {
-                        emitter.onError(throwable);
-                    }
-                });
+        return Flowable.create(emitter -> delegate.saveVisit(params, new AhoyCallback() {
+            @Override public void onSuccess(@NonNull Visit visit) {
+                emitter.onNext(visit);
+                emitter.onComplete();
             }
-        }, BackpressureMode.LATEST);
+
+            @Override public void onFailure(Throwable throwable) {
+                emitter.onError(throwable);
+            }
+        }), BackpressureStrategy.LATEST);
     }
 }

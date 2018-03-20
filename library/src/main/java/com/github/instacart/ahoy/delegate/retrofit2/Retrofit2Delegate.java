@@ -16,7 +16,6 @@
 package com.github.instacart.ahoy.delegate.retrofit2;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -31,28 +30,23 @@ import com.github.instacart.ahoy.utils.TypeUtil;
 import com.github.instacart.ahoy.utils.UtmUtil;
 import com.google.auto.value.AutoValue;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request.Builder;
-import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-
-import static java.util.UUID.randomUUID;
 
 public class Retrofit2Delegate implements AhoyDelegate {
 
@@ -85,12 +79,10 @@ public class Retrofit2Delegate implements AhoyDelegate {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(loggingEnabled ? Level.BODY : Level.NONE);
 
-        Interceptor userAgentInterceptor = new Interceptor() {
-            @Override public Response intercept(@NonNull Chain chain) throws IOException {
-                Builder builder = chain.request().newBuilder();
-                builder.header("User-Agent", deviceInfo.getUserAgent());
-                return chain.proceed(builder.build());
-            }
+        Interceptor userAgentInterceptor = chain -> {
+            Builder builder = chain.request().newBuilder();
+            builder.header("User-Agent", deviceInfo.getUserAgent());
+            return chain.proceed(builder.build());
         };
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -110,7 +102,7 @@ public class Retrofit2Delegate implements AhoyDelegate {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(JacksonConverterFactory.create(mapper))
                 .baseUrl(baseUrl)
                 .client(okHttpClient)
@@ -128,7 +120,7 @@ public class Retrofit2Delegate implements AhoyDelegate {
         request.put(Visit.SCREEN_HEIGHT, deviceInfo.getScreenHeightDp());
         request.put(Visit.SCREEN_WIDTH, deviceInfo.getScreenWidthDp());
         request.put(Visit.VISITOR_TOKEN, visitParams.visitorToken());
-        request.putAll(TypeUtil.ifNull(visitParams.extraParams(), Collections.<String, Object>emptyMap()));
+        request.putAll(TypeUtil.ifNull(visitParams.extraParams(), Collections.emptyMap()));
 
         Uri landingParams = UtmUtil.utmUri(visitParams.extraParams());
         if (landingParams != null && !TypeUtil.isEmpty(landingParams.toString())) {
@@ -140,24 +132,17 @@ public class Retrofit2Delegate implements AhoyDelegate {
         }
 
         api.registerVisit(request)
-                .compose(RxBackoff.<VisitResponse>backoff())
+                .compose(RxBackoff.backoff())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<VisitResponse>() {
-                    @Override public void call(VisitResponse visitResponse) {
-                        long expiresAt = System.currentTimeMillis() + visitDuration;
-                        Map<String, Object> extraParams
-                                = TypeUtil.ifNull(visitParams.extraParams(), Collections.<String, Object>emptyMap());
-                        callback.onSuccess(Visit.create(visitResponse.visitId(), extraParams, expiresAt));
-                    }
-                }, new Action1<Throwable>() {
-                    @Override public void call(Throwable throwable) {
-                        callback.onFailure(throwable);
-                    }
-                });
+                .subscribe(visitResponse -> {
+                    long expiresAt = System.currentTimeMillis() + visitDuration;
+                    Map<String, Object> extraParams = TypeUtil.ifNull(visitParams.extraParams(), Collections.<String, Object>emptyMap());
+                    callback.onSuccess(Visit.create(visitResponse.visitId(), extraParams, expiresAt));
+                }, callback::onFailure);
     }
 
     @Override public String newVisitorToken() {
-        return randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 
     @Override public void saveVisit(VisitParams visitParams, AhoyCallback callback) {
