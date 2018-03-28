@@ -25,7 +25,7 @@ import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 
 
-class RxAhoyDelegate {
+public class RxAhoyDelegate {
 
     private RxAhoyDelegate() {
     }
@@ -39,7 +39,7 @@ class RxAhoyDelegate {
             }
 
             @Override public void onFailure(Throwable throwable) {
-                emitter.onError(throwable);
+                emitter.tryOnError(throwable);
             }
         }), BackpressureStrategy.LATEST);
     }
@@ -53,7 +53,7 @@ class RxAhoyDelegate {
             }
 
             @Override public void onFailure(Throwable throwable) {
-                emitter.onError(throwable);
+                emitter.tryOnError(throwable);
             }
         }), BackpressureStrategy.LATEST);
     }
