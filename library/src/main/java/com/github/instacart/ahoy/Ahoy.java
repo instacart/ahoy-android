@@ -15,8 +15,8 @@
  */
 package com.github.instacart.ahoy;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.github.instacart.ahoy.LifecycleCallbackWrapper.Listener;
 import com.github.instacart.ahoy.delegate.AhoyDelegate;

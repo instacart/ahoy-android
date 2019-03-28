@@ -16,8 +16,8 @@
 package com.github.instacart.ahoy.utils;
 
 import android.net.Uri;
-import android.support.annotation.Nullable;
-import android.support.v4.util.ArrayMap;
+import androidx.annotation.Nullable;
+import androidx.collection.ArrayMap;
 
 import com.github.instacart.ahoy.Visit;
 

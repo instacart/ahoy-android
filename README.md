@@ -14,6 +14,23 @@ Ahoy Android stores visit attribution (UTM & referrer parameters) in your data s
 with visits & funnels (attributions).
 
 # Using ahoy-android
+There are just a few steps to get started using ahoy-android.
+
+## Installation
+Add this to your application's `build.gradle` file:
+
+```groovy
+repositories {
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
+dependencies {
+    implementation 'com.github.instacart:ahoy-android:latest.version.here'
+}
+```
+
 ## Visit
 Visit corresponds to user's session in the app. Visit's extra parameters (UTMs, referrer) are stored for the [duration of the visit](https://github.com/ankane/ahoy#visit-duration). After visit expires extra parameters are cleared.
 
@@ -83,23 +100,6 @@ public class AhoyRequestInterceptor implements okhttp3.Interceptor {
 
 ## Ahoy & other Analytics solutions
 At [Instacart](https://www.instacart.com) we use [Segment](https://www.segment.io) to send events a Date Warehouse and [Amplitude](https://www.amplitude.com). Whenever we make requests to Segment we include Ahoy visit token and extra parameters.
-
-
-## Installation
-Add this to your application's `build.gradle` file:
-
-```groovy
-repositories {
-    maven {
-        url "https://jitpack.io"
-    }
-}
-
-dependencies {
-    // ...
-    compile 'com.github.instacart:ahoy-android:v0.2'
-}
-```
 
 # License
 
