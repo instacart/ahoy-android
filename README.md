@@ -30,6 +30,7 @@ dependencies {
     implementation 'com.github.instacart:ahoy-android:latest.version.here'
 }
 ```
+where `latest.version.here` is the latest released version: [![](https://jitpack.io/v/instacart/ahoy-android.svg)](https://jitpack.io/#instacart/ahoy-android)
 
 ## Visit
 Visit corresponds to user's session in the app. Visit's extra parameters (UTMs, referrer) are stored for the [duration of the visit](https://github.com/ankane/ahoy#visit-duration). After visit expires extra parameters are cleared.
