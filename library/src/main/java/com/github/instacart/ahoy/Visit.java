@@ -16,8 +16,8 @@
 package com.github.instacart.ahoy;
 
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.v4.util.ArrayMap;
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
 
 import com.github.instacart.ahoy.utils.MapTypeAdapter;
 import com.github.instacart.ahoy.utils.TypeUtil;

@@ -15,7 +15,7 @@
  */
 package com.github.instacart.ahoy.delegate;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.github.instacart.ahoy.Visit;
 import com.google.auto.value.AutoValue;

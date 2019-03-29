@@ -1,7 +1,7 @@
 package com.github.instacart.ahoy.utils;
 
 import android.os.Parcel;
-import android.support.v4.util.ArrayMap;
+import androidx.collection.ArrayMap;
 
 import com.ryanharter.auto.value.parcel.TypeAdapter;
 

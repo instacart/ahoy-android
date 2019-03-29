@@ -15,7 +15,7 @@
  */
 package com.github.instacart.ahoy.tests;
 
-import android.support.v4.util.ArrayMap;
+import androidx.collection.ArrayMap;
 
 import com.github.instacart.ahoy.Ahoy;
 import com.github.instacart.ahoy.LifecycleCallbackWrapper;

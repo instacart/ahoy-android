@@ -16,7 +16,7 @@
 package com.github.instacart.ahoy.delegate.retrofit2;
 
 import android.net.Uri;
-import android.support.v4.util.ArrayMap;
+import androidx.collection.ArrayMap;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
