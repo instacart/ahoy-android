@@ -27,7 +27,7 @@ public class App extends Application {
     @Override public void onCreate() {
         super.onCreate();
         DeviceInfo deviceInfo = new SimpleDeviceInfo();
-        String demoUrl = "https://murmuring-ocean-69755.herokuapp.com/";
+        String demoUrl = "https://example.com/";
         AhoySingleton.init(this, Retrofit2Delegate.factory(demoUrl, 60 * 1000, deviceInfo, true), true);
     }
 }

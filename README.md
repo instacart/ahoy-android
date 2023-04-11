@@ -58,8 +58,6 @@ To start Ahoy manually, pass ```autoStart = false``` and call  ```Ahoy.ensureFre
 
 Please use our Sample and Tests projects for reference.
 
-[Ahoy backend demo](https://murmuring-ocean-69755.herokuapp.com) is at your service.
-
 ## UTMs
 To save additional parameters (UTM, referrer):
 ```
